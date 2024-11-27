@@ -87,6 +87,40 @@ class ConfigManager {
         }
     }
 
+    removeField(field) {
+        function removeFieldFromArray(array, field) {
+            const index = array.indexOf(field);
+            if (index !== -1) {
+                array.splice(index, 1);
+            }
+        }
+
+        function recursivelyRemoveField(fieldsArray, fieldToRemove) {
+            removeFieldFromArray(fieldsArray, fieldToRemove);
+            fieldsArray.forEach(field => {
+                if (field.fields) {
+                    recursivelyRemoveField(field.fields, fieldToRemove);
+                }
+            });
+        }
+
+        if (this.config.catalog) {
+            this.config.catalog.forEach(catalog => {
+                if (catalog.fields) {
+                    recursivelyRemoveField(catalog.fields, field);
+                }
+            });
+        }
+
+        if (this.config.posts) {
+            this.config.posts.forEach(post => {
+                if (post.fields) {
+                    recursivelyRemoveField(post.fields, field);
+                }
+            });
+        }
+    }
+
     getConfig() {
         return this.config;
     }

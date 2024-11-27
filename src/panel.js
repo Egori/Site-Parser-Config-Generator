@@ -240,8 +240,9 @@ class ConfigGenerator {
         fieldContainer.appendChild(addSubfieldButton);
 
         const removeButton = this.uiGenerator.createButton('Remove Field', 'remove-button', () => {
-            fieldContainer.remove();
+            this.configManager.removeField(field);
             this.updateJsonPreview();
+            fieldContainer.remove();
         });
         fieldContainer.appendChild(removeButton);
 
