@@ -1,0 +1,197 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.4;
+    color: #333;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 10px;
+}
+
+.header h1 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.main-url-input {
+    width: 100%;
+    padding: 4px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.config-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.section {
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.section h2 {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.add-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    margin: 5px 0;
+}
+
+.add-button:hover {
+    background: #45a049;
+}
+
+.list-container {
+    background: white;
+    border-radius: 3px;
+    padding: 5px;
+    min-height: 50px;
+    /* Removed max-height and overflow-y to eliminate scroll */
+}
+
+.config-item {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+}
+
+.field-group {
+    margin-bottom: 5px;
+}
+
+.field-group label {
+    display: block;
+    margin-bottom: 3px;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.field-group input {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.actions {
+    margin: 10px 0;
+    display: flex;
+    gap: 5px;
+}
+
+.action-button {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.action-button:hover {
+    background: #1976D2;
+}
+
+.json-preview {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.json-preview pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: #fff;
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    font-size: 11px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.selector-input {
+    position: relative;
+    display: flex;
+    gap: 5px;
+}
+
+.selector-input input {
+    flex-grow: 1;
+}
+
+.selector-input button {
+    background: #607D8B;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.selector-input button:hover {
+    background: #546E7A;
+}
+
+.remove-button {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.remove-button:hover {
+    background: #d32f2f;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+}
