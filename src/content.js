@@ -36,6 +36,86 @@ function generateSelector(element) {
     }
 }
 
+function generateOptimalSelector(element) {
+    if (!(element instanceof Element)) return;
+
+    // Если у элемента есть ID, используем его
+    if (element.id) {
+        return `#${CSS.escape(element.id)}`;
+    }
+
+    // Функция для проверки уникальности селектора
+    const isUnique = (selector) => document.querySelectorAll(selector).length === 1;
+
+    // Получаем классы элемента, исключая динамические и служебные
+    const getRelevantClasses = (el) => {
+        return Array.from(el.classList)
+            .filter(cls => 
+                !cls.startsWith('js-') && 
+                !cls.includes('active') && 
+                !cls.includes('selected') &&
+                !cls.match(/^(ng-|v-|react-)/)
+            );
+    };
+
+    const classes = getRelevantClasses(element);
+    const tag = element.nodeName.toLowerCase();
+
+    // Пробуем использовать комбинацию тега и классов
+    if (classes.length > 0) {
+        const classSelector = `${tag}.${classes.map(CSS.escape).join('.')}`;
+        if (isUnique(classSelector)) {
+            return classSelector;
+        }
+
+        // Пробуем каждый класс отдельно с тегом
+        for (const cls of classes) {
+            const selector = `${tag}.${CSS.escape(cls)}`;
+            if (isUnique(selector)) {
+                return selector;
+            }
+        }
+    }
+
+    // Ищем ближайшего родителя с ID или уникальным классом
+    let parent = element.parentElement;
+    let path = [tag];
+    let maxParents = 3; // Ограничиваем глубину поиска
+
+    while (parent && maxParents > 0) {
+        if (parent.id) {
+            return `#${CSS.escape(parent.id)} > ${path.join(' > ')}`;
+        }
+
+        const parentClasses = getRelevantClasses(parent);
+        const parentTag = parent.nodeName.toLowerCase();
+
+        if (parentClasses.length > 0) {
+            const parentSelector = `${parentTag}.${parentClasses.map(CSS.escape).join('.')}`;
+            if (isUnique(parentSelector)) {
+                return `${parentSelector} > ${path.join(' > ')}`;
+            }
+        }
+
+        // Добавляем nth-child только если есть одинаковые соседние элементы
+        let siblings = Array.from(parent.children).filter(child => 
+            child.nodeName.toLowerCase() === path[0].split(':')[0]
+        );
+
+        if (siblings.length > 1) {
+            const index = siblings.indexOf(element) + 1;
+            path[0] = `${path[0]}:nth-child(${index})`;
+        }
+
+        path.unshift(parentTag);
+        element = parent;
+        parent = parent.parentElement;
+        maxParents--;
+    }
+
+    return path.join(' > ');
+}
+
 function highlightElement(element) {
     if (highlightedElement) {
         highlightedElement.style.outline = '';
@@ -57,7 +137,7 @@ function handleClick(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    const selector = generateSelector(e.target);
+    const selector = generateOptimalSelector(e.target);
     const elementText = e.target.textContent.trim();
     
     chrome.runtime.sendMessage({
