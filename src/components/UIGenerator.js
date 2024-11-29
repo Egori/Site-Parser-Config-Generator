@@ -14,12 +14,15 @@ class UIGenerator {
         
         const button = document.createElement('button');
         button.textContent = 'Select';
+        
         button.addEventListener('click', () => {
             if (onSelectCallback) onSelectCallback(input);
         });
         
         if (onInputCallback) {
-            input.addEventListener('input', (e) => onInputCallback(e.target.value));
+            input.addEventListener('input', (e) => {
+                onInputCallback(e.target.value);
+            });
         }
         
         inputContainer.appendChild(input);
@@ -79,5 +82,47 @@ class UIGenerator {
         }
         
         return button;
+    }
+
+    createElementPreview(parent, labelText = 'Selected Element Preview') {
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'element-preview';
+        
+        const previewLabel = document.createElement('div');
+        previewLabel.className = 'preview-label';
+        previewLabel.textContent = labelText;
+        
+        const previewContent = document.createElement('div');
+        previewContent.className = 'preview-content';
+        
+        previewContainer.appendChild(previewLabel);
+        previewContainer.appendChild(previewContent);
+        parent.appendChild(previewContainer);
+        
+        return {
+            container: previewContainer,
+            update: (data) => {
+                previewContent.innerHTML = '';
+                if (data.exists) {
+                    if (data.originalText && data.originalText !== data.text) {
+                        // Show both original and filtered text for cases with filtering
+                        previewContent.innerHTML = `
+                            <div class="preview-text">Original: ${data.originalText}</div>
+                            <div class="preview-text">Filtered: ${data.text}</div>
+                        `;
+                    } else {
+                        // Show only the text for cases without filtering
+                        previewContent.innerHTML = `<div class="preview-text">${data.text || 'Empty content'}</div>`;
+                    }
+                    
+                    // If it's a link, show the href
+                    if (data.isLink && data.href) {
+                        previewContent.innerHTML += `<div class="preview-href">Link: ${data.href}</div>`;
+                    }
+                } else {
+                    previewContent.textContent = 'No element selected';
+                }
+            }
+        };
     }
 }

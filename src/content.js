@@ -1,7 +1,7 @@
 let highlightedElement = null;
 let isSelecting = false;
 
-function generateSelector(element) {
+function generateSelector_(element) {
     if (!(element instanceof Element)) return;
     
     let path = [];
@@ -24,6 +24,16 @@ function generateSelector(element) {
         element = element.parentNode;
     }
     return path.join(' > ');
+}
+
+function generateSelector(element) {
+    if (element.id) {
+        return `#${CSS.escape(element.id)}`;
+    } else if (element.className) {
+        return `${element.nodeName.toLowerCase()}.${Array.from(element.classList).map(CSS.escape).join('.')}`;
+    } else {
+        return element.nodeName.toLowerCase();
+    }
 }
 
 function highlightElement(element) {
@@ -84,15 +94,68 @@ function stopSelecting() {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log('Received message:', message);
     if (message.type === 'START_SELECTING') {
+        console.log('Starting selecting');
         startSelecting();
         sendResponse({ success: true });
     } else if (message.type === 'STOP_SELECTING') {
+        console.log('Stopping selecting');
         stopSelecting();
         sendResponse({ success: true });
+    } else if (message.type === 'GET_ELEMENT_INFO') {
+        console.log('GET_ELEMENT_INFO received:', message);
+        try {
+            const element = document.querySelector(message.selector);
+            console.log('Found element:', element);
+            
+            if (element) {
+                console.log('Element found, attempting to retrieve text or attribute value');
+                let text;
+                if (message.valueAttribute || message.nameAttribute) {
+                    const attribute = message.valueAttribute || message.nameAttribute;
+                    console.log('Attempting to retrieve attribute:', attribute);
+                    text = element.getAttribute(attribute);
+                    console.log('Attribute value:', text);
+                } else {
+                    console.log('No attribute specified, attempting to retrieve text content');
+                    if (element.value !== undefined && element.value !== '') {
+                        text = element.value;
+                    } else if (element.textContent) {
+                        text = element.textContent.trim();
+                    } else if (element.innerText) {
+                        text = element.innerText.trim();
+                    } else {
+                        text = element.innerHTML.trim();
+                    }
+                    console.log('Text content:', text);
+                }
+                
+                const isLink = element.tagName.toLowerCase() === 'a';
+                const href = isLink ? element.href : null;
+                
+                console.log('Preparing response');
+                const response = { 
+                    success: true, 
+                    text: text,
+                    isLink: isLink,
+                    href: href
+                };
+                console.log('Sending response:', response);
+                sendResponse(response);
+            } else {
+                console.log('Element not found');
+                sendResponse({ success: false });
+            }
+        } catch (error) {
+            console.error('Error in GET_ELEMENT_INFO:', error);
+            sendResponse({ success: false });
+        }
     } else if (message.type === 'TEST_SELECTOR') {
         try {
+            console.log('TEST_SELECTOR received:', message);
             const elements = document.querySelectorAll(message.selector);
+            console.log('Found elements:', elements);
             const results = Array.from(elements).map(el => ({
                 text: el.textContent.trim(),
                 attributes: Array.from(el.attributes).reduce((acc, attr) => {
@@ -100,8 +163,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     return acc;
                 }, {})
             }));
+            console.log('Sending response:', results);
             sendResponse({ success: true, results });
         } catch (error) {
+            console.error('Error in TEST_SELECTOR:', error);
             sendResponse({ success: false, error: error.message });
         }
     }

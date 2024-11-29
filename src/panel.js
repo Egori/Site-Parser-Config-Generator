@@ -40,22 +40,18 @@ class ConfigGenerator {
             this.updateJsonPreview();
         });
 
+        // Link Selector with preview
         const linkSelectorInput = this.uiGenerator.createSelectorInput('Link Selector', catalogContainer, 
             (value) => {
                 catalog.linkSelector = value;
                 this.updateJsonPreview();
+                updateLinkPreview();
             }, 
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
+
+        // Create preview for Link Selector
+        const linkPreview = this.uiGenerator.createElementPreview(catalogContainer, 'Link Preview');
 
         const childCatalogInput = this.uiGenerator.createTextInput('Child Catalog Name', catalogContainer, (value) => {
             catalog.childCatalogName = value;
@@ -67,22 +63,37 @@ class ConfigGenerator {
             this.updateJsonPreview();
         });
 
+        // Pagination Link Selector with preview
         const paginationInput = this.uiGenerator.createSelectorInput('Pagination Link Selector', catalogContainer, 
             (value) => {
                 catalog.paginationLinkSelector = value;
                 this.updateJsonPreview();
+                updatePaginationPreview();
             }, 
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
+
+        // Create preview for Pagination Link Selector
+        const paginationPreview = this.uiGenerator.createElementPreview(catalogContainer, 'Pagination Link Preview');
+
+        // Preview update functions
+        const updateLinkPreview = () => {
+            this.getElementInfo(
+                catalog.linkSelector,
+                null,
+                null,
+                linkPreview
+            );
+        };
+
+        const updatePaginationPreview = () => {
+            this.getElementInfo(
+                catalog.paginationLinkSelector,
+                null,
+                null,
+                paginationPreview
+            );
+        };
 
         const isMainCheckbox = this.uiGenerator.createCheckbox('Is Main Catalog', catalogContainer, (checked) => {
             catalog.isMain = checked;
@@ -117,39 +128,40 @@ class ConfigGenerator {
             this.updateJsonPreview();
         });
 
+        // Link Selector with preview
         const linkSelectorInput = this.uiGenerator.createSelectorInput('Link Selector', postContainer, 
             (value) => {
                 post.linkSelector = value;
                 this.updateJsonPreview();
+                updateLinkPreview();
             }, 
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
 
+        // Create preview for Link Selector
+        const linkPreview = this.uiGenerator.createElementPreview(postContainer, 'Link Preview');
+
+        // Pagination Link Selector with preview
         const paginationInput = this.uiGenerator.createSelectorInput('Pagination Link Selector', postContainer, 
             (value) => {
                 post.paginationLinkSelector = value;
                 this.updateJsonPreview();
+                updatePaginationPreview();
             }, 
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
+
+        // Create preview for Pagination Link Selector
+        const paginationPreview = this.uiGenerator.createElementPreview(postContainer, 'Pagination Link Preview');
+
+        // Preview update functions
+        const updateLinkPreview = () => {
+            this.getElementInfo(post.linkSelector, null, null, linkPreview);
+        };
+
+        const updatePaginationPreview = () => {
+            this.getElementInfo(post.paginationLinkSelector, null, null, paginationPreview);
+        };
 
         const addFieldButton = this.uiGenerator.createButton('Add Field', 'add-button', () => {
             const newField = this.configManager.addFieldToPost(post, {});
@@ -157,11 +169,11 @@ class ConfigGenerator {
         });
         postContainer.appendChild(addFieldButton);
 
-        const addCatalogButton = this.uiGenerator.createButton('Add Catalog Reference', 'add-button', () => {
-            const catalogRef = this.configManager.addCatalogReferenceToPost(post, {});
-            this.createCatalogReference(postContainer, catalogRef);
-        });
-        postContainer.appendChild(addCatalogButton);
+        // const addCatalogRefButton = this.uiGenerator.createButton('Add Catalog Reference', 'add-button', () => {
+        //     const catalogRef = this.configManager.addCatalogReferenceToPost(post, {});
+        //     this.createCatalogReference(postContainer, catalogRef);
+        // });
+        // postContainer.appendChild(addCatalogRefButton);
 
         const removeButton = this.uiGenerator.createButton('Remove Post', 'remove-button', () => {
             this.configManager.removePost(post);
@@ -175,66 +187,100 @@ class ConfigGenerator {
 
     createField(parent, field) {
         const fieldContainer = document.createElement('div');
-        fieldContainer.className = 'config-item';
+        fieldContainer.className = 'field-container';
+        parent.appendChild(fieldContainer);
 
+        // Field Name input
         const nameInput = this.uiGenerator.createTextInput('Field Name', fieldContainer, (value) => {
             field.name = value;
             this.updateJsonPreview();
         });
 
-        const valueSelectorInput = this.uiGenerator.createSelectorInput('Value Selector', fieldContainer, 
+        // Group for Value
+        const valueGroup = document.createElement('div');
+        valueGroup.className = 'value-group';
+        fieldContainer.appendChild(valueGroup);
+
+        const valueSelectorInput = this.uiGenerator.createSelectorInput('Value Selector', valueGroup, 
             (value) => {
                 field.valueSelector = value;
                 this.updateJsonPreview();
+                updatePreview();
             },
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
 
-        const valueAttributeInput = this.uiGenerator.createTextInput('Value Attribute', fieldContainer, (value) => {
+        const valueAttributeInput = this.uiGenerator.createTextInput('Value Attribute', valueGroup, (value) => {
             field.valueAttribute = value;
             this.updateJsonPreview();
+            updatePreview();
         });
 
-        const nameSelectorInput = this.uiGenerator.createSelectorInput('Name Selector', fieldContainer, 
+        const valueRegexFilterInput = this.uiGenerator.createTextInput('Regex Value filter', valueGroup, (value) => {
+            field.valueRegexFilter = value;
+            this.updateJsonPreview();
+            updatePreview();
+        });
+
+        // Create preview for Value group
+        const valuePreview = this.uiGenerator.createElementPreview(valueGroup, 'Value Preview');
+
+        // Group for Name
+        const nameGroup = document.createElement('div');
+        nameGroup.className = 'name-group';
+        fieldContainer.appendChild(nameGroup);
+
+        const nameSelectorInput = this.uiGenerator.createSelectorInput('Name Selector', nameGroup, 
             (value) => {
                 field.nameSelector = value;
                 this.updateJsonPreview();
+                updatePreview();
             },
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
 
-        const nameAttributeInput = this.uiGenerator.createTextInput('Name Attribute', fieldContainer, (value) => {
+        const nameAttributeInput = this.uiGenerator.createTextInput('Name Attribute', nameGroup, (value) => {
             field.nameAttribute = value;
             this.updateJsonPreview();
+            updatePreview();
         });
 
-        const regexFilterInput = this.uiGenerator.createTextInput('Regex Filter', fieldContainer, (value) => {
-            field.regexFilter = value;
+        const nameRegexFilterInput = this.uiGenerator.createTextInput('Regex Name filter', nameGroup, (value) => {
+            field.nameRegexFilter = value;
             this.updateJsonPreview();
+            updatePreview();
         });
+
+        // Create preview for Name group
+        const namePreview = this.uiGenerator.createElementPreview(nameGroup, 'Name Preview');
+
+        // Update preview logic
+        const updatePreview = () => {
+            const valueSelector = field.valueSelector;
+            const nameSelector = field.nameSelector;
+            const valueRegex = field.valueRegexFilter ? new RegExp(field.valueRegexFilter) : null;
+            const nameRegex = field.nameRegexFilter ? new RegExp(field.nameRegexFilter) : null;
+
+            // Update Value preview
+            this.getElementInfo(
+                valueSelector,
+                field.valueAttribute ? { type: 'valueAttribute', value: field.valueAttribute } : null,
+                valueRegex,
+                valuePreview
+            );
+
+            // Update Name preview
+            this.getElementInfo(
+                nameSelector,
+                field.nameAttribute ? { type: 'nameAttribute', value: field.nameAttribute } : null,
+                nameRegex,
+                namePreview
+            );
+        };
 
         const addSubfieldButton = this.uiGenerator.createButton('Add Subfield', 'add-button', () => {
             if (!field.fields) field.fields = [];
-            const newField = {};
-            field.fields.push(newField);
+            const newField = this.configManager.addFieldToPost(field, {});
             this.createField(fieldContainer, newField);
         });
         fieldContainer.appendChild(addSubfieldButton);
@@ -246,7 +292,6 @@ class ConfigGenerator {
         });
         fieldContainer.appendChild(removeButton);
 
-        parent.appendChild(fieldContainer);
         return fieldContainer;
     }
 
@@ -259,16 +304,7 @@ class ConfigGenerator {
                 catalogRef.catalogNameSelector = value;
                 this.updateJsonPreview();
             },
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
 
         const catalogValueSelectorInput = this.uiGenerator.createSelectorInput('Catalog Value Selector', container, 
@@ -276,16 +312,7 @@ class ConfigGenerator {
                 catalogRef.catalogValueSelector = value;
                 this.updateJsonPreview();
             },
-            (input) => {
-                this.activeInput = input;
-                try {
-                    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                        chrome.tabs.sendMessage(tabs[0].id, {type: 'START_SELECTING'});
-                    });
-                } catch (error) {
-                    console.error('Error sending message to tab:', error);
-                }
-            }
+            (input) => this.startElementSelection(input)
         );
 
         const catalogNameInput = this.uiGenerator.createTextInput('Catalog Name', container, (value) => {
@@ -293,24 +320,79 @@ class ConfigGenerator {
             this.updateJsonPreview();
         });
 
-        const removeButton = this.uiGenerator.createButton('Remove Catalog Reference', 'remove-button', () => {
-            container.remove();
-            const index = parent.post.catalogs.indexOf(catalogRef);
-            if (index > -1) {
-                parent.post.catalogs.splice(index, 1);
-            }
-            this.updateJsonPreview();
-        });
-        container.appendChild(removeButton);
+        // const removeButton = this.uiGenerator.createButton('Remove Catalog Reference', 'remove-button', () => {
+        //     container.remove();
+        //     const index = parent.post.catalogs.indexOf(catalogRef);
+        //     if (index > -1) {
+        //         parent.post.catalogs.splice(index, 1);
+        //     }
+        //     this.updateJsonPreview();
+        // });
+        // container.appendChild(removeButton);
 
         parent.appendChild(container);
         return container;
     }
 
+    sendMessageToActiveTab(message, callback) {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, message, callback);
+            }
+        });
+    }
+
+    startElementSelection(input) {
+        this.activeInput = input;
+        try {
+            this.sendMessageToActiveTab({type: 'START_SELECTING'});
+        } catch (error) {
+            console.error('Error sending message to tab:', error);
+        }
+    }
+
+    getElementInfo(selector, attribute, regex, previewElement) {
+        if (!selector) return;
+
+        this.sendMessageToActiveTab({
+            type: 'GET_ELEMENT_INFO',
+            selector: selector,
+            ...attribute && { [attribute.type]: attribute.value }
+        }, response => {
+            if (response && response.success) {
+                let displayText = response.text;
+                let previewData = {
+                    exists: true,
+                    originalText: displayText,
+                    text: displayText,
+                    isLink: response.isLink,
+                    href: response.href
+                };
+
+                if (regex && displayText) {
+                    if (!regex.test(displayText)) {
+                        previewData.text = 'No match';
+                    }
+                }
+
+                previewElement.update(previewData);
+            } else {
+                previewElement.update({ exists: false });
+            }
+        });
+    }
+
     handleElementSelected(data) {
         if (this.activeInput) {
             this.activeInput.value = data.selector;
-            this.activeInput.dispatchEvent(new Event('input'));
+            // Trigger the input event to update the configuration
+            const event = new Event('input', {
+                bubbles: true,
+                cancelable: true,
+            });
+            this.activeInput.dispatchEvent(event);
+            
+            // Reset the active input
             this.activeInput = null;
         }
     }

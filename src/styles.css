@@ -195,3 +195,47 @@ body {
     align-items: center;
     font-size: 12px;
 }
+
+.element-preview {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background: #fff;
+}
+
+.preview-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.preview-content {
+    min-height: 50px;
+    padding: 8px;
+    background: #f8f8f8;
+    border-radius: 3px;
+    border: 1px solid #eee;
+    overflow: auto;
+}
+
+.preview-content:empty::before {
+    content: 'No element selected';
+    color: #888;
+    font-style: italic;
+}
+
+.preview-text {
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.preview-href {
+    font-size: 11px;
+    color: #666;
+    word-break: break-all;
+}
+
+.preview-href::before {
+    content: '🔗 ';
+}
